@@ -1,14 +1,12 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import fs from "fs";
-import axios from 'axios';
 import { key } from './_keys.js';
-import { resolve } from 'path';
 
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent // Needed to access message.content
+        GatewayIntentBits.MessageContent,
     ]
 });
 
@@ -20,7 +18,7 @@ client.on('messageCreate', message => {
             client.destroy();
         });
     }
-});
+})
 
 //help command
 client.on("messageCreate", message => {
@@ -34,20 +32,22 @@ const blockedWords = fs.readFileSync("wordFilter.txt", "utf8").split(",").map(wo
 
 client.on('messageCreate', async message => {
     
+    // Ignore messages from bots, including itself
     if (message.author.bot) return;
 
-    for (const word of blockedWords) {
-        if (message.content.toLowerCase().includes(word.toLowerCase())) {
-            message.delete();
-            await new Promise(resolve => setTimeout(resolve, 150));
-            message.channel.send('Your message was deleted because the content included a blocked word!');
-            break;
-        }
+    // Check if the message contains any of the blocked words
+    const containsBlockedWord = blockedWords.some(word => message.content.toLowerCase().includes(word));
+
+    if (containsBlockedWord) {
+        // Delete the message if it contains a blocked word
+        await message.delete();
+        // Send a warning message
+        message.channel.send('Your message was deleted because it contained inappropriate content.');
+        return; // Exit the function after handling a blocked word
     }
+
+    // ... Rest of your message handling logic (if any) ...
 });
-
-
-
 
 client.login(key); // Assuming 'key' is your bot token from _keys.js
 console.log("Starting weather bot...");
