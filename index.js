@@ -7,7 +7,7 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers
+    GatewayIntentBits.GuildMembers,
   ],
 });
 
@@ -28,7 +28,9 @@ client.on("messageCreate", (message) => {
   if (message.content === "!help") {
     message.channel.send("Discord bot is currently under maintainence!");
   }
-}); //word filter command
+});
+
+//word filter command
 const blockedWords = fs
   .readFileSync("wordFilter.txt", "utf8")
   .split(",")
@@ -55,8 +57,23 @@ client.on("messageCreate", async (message) => {
 //Welcome message that dm's the user
 client.on("guildMemberAdd", (member) => {
   member.send("Welcome to the server!, Please read the rules!");
+});
+
+//spam filter
+const spam = new Set();
+client.on("messageCreate", (message) => {
+  if (message.author.bot) return;
+  if (spam.has(message.author.id)) {
+    message.delete();
+    message.channel.send("You are sending messages too fast!");
+    return;
   }
-);
+  spam.add(message.author.id);
+  setTimeout(() => {
+    spam.delete(message.author.id);
+  }, 500);
+});
+
 
 client.login(key); // Assuming 'key' is your bot token from _keys.js
 console.log("Starting JS-Bot...");
