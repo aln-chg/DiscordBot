@@ -74,6 +74,12 @@ client.on("messageCreate", (message) => {
   }, 500);
 });
 
+//command for sending the github repo for this bot
+client.on("messageCreate", (message) => {
+  if (message.content === "!github") {
+    message.channel.send("https://github.com/aln-chg/DiscordBot");
+  }
+});
 
-client.login(key); // Assuming 'key' is your bot token from _keys.js
+client.login(key); // Assuming 'key' is your bot token from _keys.
 console.log("Starting JS-Bot...");
